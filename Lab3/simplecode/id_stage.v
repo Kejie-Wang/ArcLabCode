@@ -60,7 +60,7 @@ module id_stage (clk,
 			input [31:0] if_pc4;
 			
 			input [4:0] wb_destR;
-			input [31:0] wb_dest;
+			input [31:0] wb_dest; 
 			input wb_wreg;
 			
 			input[3:0] IF_ins_type;
