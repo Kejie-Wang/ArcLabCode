@@ -49,71 +49,29 @@ module regfile(clk,
 	wire [4:0] raddr_B;
 	wire [31:0] wdata;
 	wire we;
-	reg [31:0] rdata_A;
-	reg [31:0] rdata_B;
-	reg [31:0] reg_content;
+	wire [31:0] rdata_A;
+	wire [31:0] rdata_B;
+	wire [31:0] reg_content;
 	
-	reg [31:0] r0;
-	reg [31:0] r1;
-	reg [31:0] r2;
-	reg [31:0] r3;
-	reg [31:0] r4;
-	reg [31:0] r5;
-	reg [31:0] r6;
-	reg [31:0] r7;
-	reg [31:0] r8;
-	reg [31:0] r9;
-	reg [31:0] r10;
-	reg [31:0] r11;
-	reg [31:0] r12;
-	reg [31:0] r13;
-	reg [31:0] r14;
-	reg [31:0] r15;
+	reg [31:0] regs[0:31];
 
+	integer i;
 	always @ (negedge clk or posedge rst) begin		
 		if (rst == 1) begin		//reset is triggered
-			r0 <= 0;
-			r1 <= 0;
-			r2 <= 0;
-			r3 <= 0;
-			r4 <= 0;
-			r5 <= 0;
-			r6 <= 0;
-			r7 <= 0;
-			r8 <= 0;
-			r9 <= 0;
-			r10 <= 0;
-			r11 <= 0;
-			r12 <= 0;
-			r13 <= 0;
-			r14 <= 0;
-			r15 <= 0;
+			for(i=0;i<32;i=i+1)
+				regs[i] <= 0;
 		end
 		else if (we == 1) begin		//write register when we is high level
-			case (waddr)
-				5'b00000: r0 <= 0;
-				5'b00001: r1 <= wdata;
-				5'b00010: r2 <= wdata;
-				5'b00011: r3 <= wdata;
-				5'b00100: r4 <= wdata;
-				5'b00101: r5 <= wdata;
-				5'b00110: r6 <= wdata;
-				5'b00111: r7 <= wdata;
-				5'b01000: r8 <= wdata;
-				5'b01001: r9 <= wdata;
-				5'b01010: r10 <= wdata;
-				5'b01011: r11 <= wdata;
-				5'b01100: r12 <= wdata;
-				5'b01101: r13 <= wdata;
-				5'b01110: r14 <= wdata;
-				5'b01111: r15 <= wdata;
-				default:  r0 <= 0;
-			endcase
+			regs[waddr] <= (waddr==0) ? 0:wdata;
 		end
 	end
 
+	assign rdata_A = (raddr_A == 0) ? 0 : regs[raddr_A];
+	assign rdata_B = (raddr_B == 0) ? 0 : regs[raddr_B];
+	assign reg_content = (which_reg == 0) ? 0 : regs[which_reg];
+	
 	//read when clk is low level
-	always @ (clk) begin		//when clk is changed
+	/*always @ (clk) begin		//when clk is changed
 		if	(clk == 0) begin				//when clk is low level
 		  case(raddr_A)
 				5'b00000: rdata_A <= r0;
@@ -179,4 +137,5 @@ module regfile(clk,
 				default:  reg_content <= r0;
 			endcase
 		end
+		*/
 	endmodule 

@@ -87,7 +87,7 @@ module if_stage (clk, 	//step
 					run <= 1'b1;
 					if_pc4 <= pc + 1;	
 					isrst <= run;					
-					if_inst[31:0] = run ? inst_m[31:0] : 0;
+					if_inst[31:0] <= run ? inst_m[31:0] : 0;
 				end
 			end
 
