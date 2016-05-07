@@ -18,32 +18,61 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module wb_stage(clk, rst, mem_destR, mem_aluR, mem_mdata, mem_wreg, mem_m2reg, wb_wreg, 
-				wb_dest, wb_destR, MEM_ins_type, MEM_ins_number, WB_ins_type, WB_ins_number);
-	input clk, rst;
-	input[4:0] mem_destR;
-	input[31:0] mem_aluR;
-	input[31:0] mem_mdata;
-	input mem_wreg;
-	input mem_m2reg;
-	
-	input[3:0] MEM_ins_type;
-	input[3:0]	MEM_ins_number;
-	output[3:0] WB_ins_type;
-	output[3:0] WB_ins_number;
-	
-	output wb_wreg;
-	output[4:0] wb_destR;
-	output[31:0] wb_dest;
+module wb_stage(clk, rst, 
+					 mem_destR, 
+					 mem_aluR, 
+					 mem_mdata, 
+					 mem_wreg, 
+					 mem_m2reg, 
+					 
+					 wb_wreg, 				
+					 wb_dest, 
+					 wb_destR, 
+					 
+					 MEM_ins_type, 
+					 MEM_ins_number, 
+					 WB_ins_type, 
+					 WB_ins_number
+					 );
+		input clk, rst;
+		input[4:0] mem_destR;
+		input[31:0] mem_aluR;
+		input[31:0] mem_mdata;
+		input mem_wreg;
+		input mem_m2reg;
+		
+		input[3:0] MEM_ins_type;
+		input[3:0]	MEM_ins_number;
+		output[3:0] WB_ins_type;
+		output[3:0] WB_ins_number;
+		
+		output wb_wreg;
+		output[4:0] wb_destR;
+		output[31:0] wb_dest;
 
-	wire wm2reg;
-	wire [31:0] 	wdata_out,waluout;
+		
+		reg [3:0] WB_ins_type;
+		reg [3:0] WB_ins_number;
+		
+		reg  wb_wreg;
+		reg [4:0] wb_destR;
+		reg [31:0] wb_dest;
 	
-	assign wb_dest=wm2reg?wdata_out:waluout;
-	
-	Reg_MEM_WB x_Reg_MEM_WB(clk,rst,mem_wreg,mem_m2reg,mem_mdata,mem_aluR,mem_destR,	//inputs
-											wb_wreg,wm2reg,wdata_out,waluout,wb_destR,		 //outputs
-											MEM_ins_type, MEM_ins_number, WB_ins_type, WB_ins_number);	
-	
+		always@(posedge clk or posedge rst)	begin
+			if(rst) begin
+				wb_wreg <= 0;
+				wb_dest <= 0;
+				wb_destR <= 0;
+				WB_ins_type <= 0;
+				WB_ins_number <= 0;
+			end
+			else begin
+				wb_wreg <= mem_wreg;
+				wb_dest <= mem_m2reg ? mem_mdata : mem_aluR;
+				wb_destR <= mem_destR;
+				WB_ins_type <= MEM_ins_type;
+				WB_ins_number <= MEM_ins_number;
+			end
+	end
 
 endmodule

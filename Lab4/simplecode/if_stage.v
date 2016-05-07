@@ -53,44 +53,41 @@ module if_stage (clk, 	//step
 			wire rst;
 			wire ctrl_branch;
 			wire [31:0] nid_pc;
-			wire [31:0] if_inst;
 			wire [31:0] inst_m;
 			reg [31:0] pc;
 			reg run;
 			reg [3:0] ID_ins_type;
 			reg [3:0] ID_ins_number;
+			reg [31:0]if_pc4;
+			reg [31:0]if_inst;
 			
+			reg isrst;
 			initial begin
 				pc[31:0]=32'hffffffff;
 				run = 1'b0;
+				isrst = 1'b0;
 				ID_ins_type[3:0] = 4'b0000;
 				ID_ins_number[3:0] = 4'b0000;
 			end
 
-			assign if_pc4 = pc + 1;
 			assign if_npc = ctrl_branch ? nid_pc : pc + 1;
 			assign IF_ins_number[3:0] = npc[3:0] ;
 			assign IF_ins_type[3:0] = `INST_TYPE_NONE;
-			assign if_inst[31:0] = inst_m[31:0];
-			
-			/*always @ (posedge rst) begin
-				pc[31:0]=32'hffffffff;
-				run = 1'b0;
-				ID_ins_type[3:0] = 4'b0000;
-				ID_ins_number[3:0] = 4'b0000;
-			end*/
 			
 			always @ (posedge clk or posedge rst) begin
 				if(rst == 1'b1) begin
 					pc[31:0] <=32'hffffffff;
+					if_pc4 <= 0;
 					run <= 1'b0;
-					//inst_m <= 0;
-					//ID_ins_type[3:0] <= 4'b0000;
-					//ID_ins_number[3:0] <= 4'b0000;
+					isrst <= 0;
+					if_inst <= 0;
 				end
 				else begin
 					pc[31:0] <= npc[31:0];
 					run <= 1'b1;
+					if_pc4 <= pc + 1;	
+					isrst <= run;					
+					if_inst[31:0] <= run ? inst_m[31:0] : 0;
 				end
 			end
 

@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 module ex_stage (clk, 
 					  rst,
+					  
 					  id_imm, //instruction decode immediate
 					  id_inA, 
 					  id_inB, 				  
@@ -31,7 +32,7 @@ module ex_stage (clk,
 					  id_shift, 
 					  id_branch, 
 					  id_pc4,
-					  id_regrt,	//
+					  id_regrt,	
 					  id_rt,
 					  id_rd,	
 					  
@@ -43,7 +44,6 @@ module ex_stage (clk,
 					  ex_destR, 
 					  ex_branch, 
 					  ex_pc, 
-					  ex_zero,
 					  
 					  ID_ins_type, 
 					  ID_ins_number, 
@@ -67,57 +67,67 @@ module ex_stage (clk,
 			
 			input[3:0] ID_ins_type;
 			input[3:0] ID_ins_number;
-			output[3:0] EXE_ins_type;
-			output[3:0] EXE_ins_number;
+			output reg [3:0] EXE_ins_type;
+			output reg [3:0] EXE_ins_number;
 			
 			input[31:0] id_pc4;
 			input id_branch;
-			output ex_branch;
-			output ex_zero;
-			output ex_wreg;
-			output ex_m2reg;
-			output ex_wmem;
-			output[31:0] ex_aluR;
-			output[31:0] ex_inB;
-			output[31:0] ex_pc;
-			output[4:0] ex_destR;
+					
+			output reg ex_wreg;
+			output reg ex_m2reg;
+			output reg ex_wmem;
+			output reg [31:0] ex_aluR;
+			output reg [31:0] ex_inB;			
+			output reg [4:0] ex_destR;
+			output reg ex_branch;
+			output reg [31:0] ex_pc;
 			
-			wire [3:0] ealuc;
-			wire ealuimm,eshift;
+			wire zero;
 			wire [31:0] sa;
-			wire [31:0] edata_a,edata_b,a_in,b_in,odata_imm;
-			wire [31:0] ex_aluR;
-			wire [31:0] epc4;
-			wire e_regrt;
-			wire [4:0]e_rt;
-			wire [4:0]e_rd;
 		
-			assign a_in = eshift ? sa : edata_a;
-			assign b_in = ealuimm ? odata_imm : edata_b;
-			assign ex_inB = id_inB;
-			assign ex_pc = id_pc4 + odata_imm; //{odata_imm[29:0], 2'b00};
-			assign ex_zero = ~(|ex_aluR);			//zero flag
-			assign ex_destR = e_regrt? e_rt : e_rd; //the write back destination reg
+			wire [31:0]a_in;
+			wire [31:0]b_in;
+			wire [31:0]aluR;
+			assign a_in = id_shift ? sa : id_inA;
+			assign b_in = id_aluimm ? id_imm : id_inB;
+			assign zero = ~(|aluR);			//zero flag	
 			
-			
-			//modify
-			wire ex_branch1;
-			assign ex_branch = ex_branch1 & ex_zero;
-			
-			Reg_ID_EXE	x_Reg_ID_EXE(clk, rst, id_wreg, id_m2reg,id_wmem,id_aluc,id_shift,id_aluimm, id_inA,id_inB,id_imm,   id_branch,id_pc4,id_regrt,id_rt,id_rd,
-													ex_wreg, ex_m2reg,ex_wmem,ealuc,  eshift,  ealuimm, edata_a,edata_b,odata_imm,ex_branch1,epc4,e_regrt,e_rt,e_rd,
-											 ID_ins_type,ID_ins_number,EXE_ins_type, EXE_ins_number
-											 );
+			always@(posedge clk or posedge rst) begin		
+				if(rst == 1'b1) begin
+					ex_wreg <= 0;
+					ex_m2reg <= 0;
+					ex_wmem <= 0;
+					ex_aluR <= 0;
+					ex_inB <= 0;
+					ex_destR <= 0;
+					ex_branch<= 0;
+					ex_pc <= 0;
+					EXE_ins_type <= 0;
+					EXE_ins_number <= 0;
+				end
+				else begin
+					ex_wreg <= id_wreg;
+					ex_m2reg <= id_m2reg;
+					ex_wmem <= id_wmem;					
+					ex_inB <= id_inB;
+					ex_aluR <= aluR;
+					ex_destR <= id_regrt? id_rt : id_rd; //the write back destination reg
+					ex_branch<=id_branch & zero;
+					ex_pc <= id_pc4 + id_imm; //{odata_imm[29:0], 2'b00};
+					EXE_ins_type <= ID_ins_type;
+					EXE_ins_number <= ID_ins_number;
+				end
+			end
 			
 			//sa: shamt
-			imm2sa x_imm2sa(odata_imm,
+			imm2sa x_imm2sa(id_imm,
 								 sa
 								 );
 			
 			Alu x_Alu(a_in,
 						 b_in,
-						 ealuc,
-						 ex_aluR
+						 id_aluc,
+						 aluR
 						 );
 	
 endmodule
