@@ -53,7 +53,7 @@ module regfile(clk,
 	wire [31:0] rdata_B;
 	wire [31:0] reg_content;
 	
-	reg [31:0] regs[0:31];
+	reg [31:0]regs[0:31];
 
 	integer i;
 	always @ (negedge clk or posedge rst) begin		

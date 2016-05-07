@@ -37,6 +37,7 @@ module id_stage (clk,
 					  cu_aluimm, //the second operand of alu is imme or reg2
 					  cu_branch, //whether the instr is a branch
 					  
+					  id_inst,
 					  id_pc4, 	//instruction decode pc+4
 					  id_inA, 	//read data A
 					  id_inB, 	//read data B
@@ -78,6 +79,7 @@ module id_stage (clk,
 			output cu_aluimm;
 			output cu_regrt;
 			
+			output reg [31:0] id_inst;
 			output reg [31:0] id_pc4;
 			output reg [31:0] id_inA;
 			output reg [31:0] id_inB;
@@ -100,6 +102,7 @@ module id_stage (clk,
 				if (rst==1)begin			
 					ID_ins_type <= 0;
 					ID_ins_number <= 0;
+					id_inst <=0;
 					id_pc4 <= 0;
 					id_imm <= 0;
 					rt <= 0;
@@ -109,6 +112,7 @@ module id_stage (clk,
 				begin		
 					ID_ins_type <= IF_ins_type;
 					ID_ins_number <= IF_ins_number;
+					id_inst <= if_inst;
 					id_pc4 <= if_pc4;			
 					id_imm <= cu_sext?( imm[15]?{16'hffff,imm}:{16'b0,imm}):{16'b0,imm};	//immediate extend
 					rt <= if_inst[20:16];

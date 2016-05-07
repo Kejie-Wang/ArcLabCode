@@ -28,11 +28,13 @@ module top(input wire CCLK,
 		   output wire LCDRW, 
 		   output wire [3:0]LCDDAT
 		   );
-
+			wire [31:0]inst;
+			
 			wire [31:0] if_npc;
 			wire [31:0] if_pc4;
 			wire [31:0] if_inst;
 			
+			wire [31:0] id_inst;		
 			wire [31:0] id_pc4;	
 			wire [31:0] id_inA;
 			wire [31:0] id_inB;
@@ -95,7 +97,7 @@ module top(input wire CCLK,
 			wire rslcd, rwlcd, elcd;
 			wire clk_1ms;
 			wire BTN3OUT;
-			assign BTN3OUT = BTN3;
+			//assign BTN3OUT = BTN3;
 			assign LCDDAT[3]=lcdd[3];
 			assign LCDDAT[2]=lcdd[2];
 			assign LCDDAT[1]=lcdd[1];
@@ -111,6 +113,9 @@ module top(input wire CCLK,
 			wire rst;
 			
 			assign rst = BTN2;
+			
+			wire stall;
+			
 			initial begin
 				strdata <= "01234567 00 0123f01d01e01m01w01 ";
 				SW_old = 4'b0;
@@ -170,23 +175,22 @@ module top(input wire CCLK,
 			end
 			
 			always @(posedge BTN3OUT or posedge rst) begin
-				if(rst == 1'b1)
+				if(rst == 1'b1) begin
 					clk_cnt <= 0;
+				end
 				else
 					clk_cnt <= clk_cnt + 1;
 			end
 
 			assign pc [31:0] = if_npc[31:0];
-			/*
+			
+		
+			
 			anti_jitter x_anti_jitter(CCLK,
 												rst,
 												BTN3,
 												BTN3OUT
 												);
-			*/
-			//assign BTNOUT3 = BTN3;
-			/*@brief Instruction fetch stage
-			*/ 
 			if_stage x_if_stage(BTN3OUT, 
 								rst, 
 								pc, 
@@ -201,7 +205,10 @@ module top(input wire CCLK,
 								IF_ins_type, //instruction type
 								IF_ins_number,//instruction number
 								ID_ins_type,
-								ID_ins_number
+								ID_ins_number,
+								
+								inst,
+								stall
 								);
 
 			id_stage x_id_stage(BTN3OUT, 
@@ -219,6 +226,7 @@ module top(input wire CCLK,
 								id_shift, 
 								id_aluimm, 
 								id_branch, 
+								id_inst,
 								id_pc4, 
 								id_inA, 
 								id_inB, 
@@ -302,4 +310,11 @@ module top(input wire CCLK,
 								OUT_ins_type, 
 								OUT_ins_number
 								);
+			stall_ctr x_stall_ctr(clk,
+										 rst,
+										 inst,
+										 if_inst,	
+										 id_inst,
+										 stall
+										 );
 		endmodule
