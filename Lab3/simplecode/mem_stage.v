@@ -60,17 +60,20 @@ module mem_stage (clk, rst,
 			reg mem_wreg; 
 			reg mem_m2reg; 
 			reg mem_aluR; 
+			reg [31:0]mem_mdata;
 			reg mem_destR;
 			reg MEM_ins_type;
 			reg MEM_ins_number;
 			
-			wire nclk = ~clk;
+			wire nclk = ~clk; 
+			wire data;
 			
 			always@(posedge clk or posedge rst) begin
 				if(rst) begin
 					mem_wreg <= 0;
 					mem_m2reg <= 0;
 					mem_aluR <= 0;
+					mem_mdata <= 0;
 					mem_destR <= 0;
 					MEM_ins_type <= 0;
 					MEM_ins_number <= 0;
@@ -79,12 +82,13 @@ module mem_stage (clk, rst,
 					mem_wreg <= ex_wreg;
 					mem_m2reg <= ex_m2reg;
 					mem_aluR <= ex_aluR;
+					mem_mdata <= data;
 					mem_destR <= ex_destR;
 					MEM_ins_type <= EXE_ins_type;
 					MEM_ins_number <= EXE_ins_number;
 				end
 			end
 			
-			data_mem x_data_mem(nclk,ex_wmem,ex_aluR[7:0],ex_inB,mem_mdata);
+			data_mem x_data_mem(nclk,ex_wmem,ex_aluR[7:0],ex_inB,data);
 	
 endmodule

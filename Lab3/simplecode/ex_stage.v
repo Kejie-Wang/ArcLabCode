@@ -91,10 +91,12 @@ module ex_stage (clk,
 			wire [4:0]e_rt;
 			wire [4:0]e_rd;
 		
+			wire [31:0]a_in;
+			wire [31:0]b_in;
 			assign a_in = id_shift ? sa : id_inA;
 			assign b_in = id_aluimm ? id_imm : id_inB;
-
 			assign zero = ~(|ex_aluR);			//zero flag	
+			
 			always@(posedge clk or posedge rst) begin		
 				if(rst == 1'b1) begin
 					ex_wreg <= 0;
@@ -127,7 +129,7 @@ module ex_stage (clk,
 			
 			Alu x_Alu(a_in,
 						 b_in,
-						 ealuc,
+						 id_aluc,
 						 ex_aluR
 						 );
 	
