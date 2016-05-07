@@ -59,14 +59,14 @@ module mem_stage (clk, rst,
 			
 			reg mem_wreg; 
 			reg mem_m2reg; 
-			reg mem_aluR; 
+			reg [31:0]mem_aluR; 
 			reg [31:0]mem_mdata;
-			reg mem_destR;
+			reg [4:0]mem_destR;
 			reg MEM_ins_type;
 			reg MEM_ins_number;
 			
 			wire nclk = ~clk; 
-			wire data;
+			wire [31:0]data;
 			
 			always@(posedge clk or posedge rst) begin
 				if(rst) begin

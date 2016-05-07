@@ -76,32 +76,28 @@ module ex_stage (clk,
 			output reg ex_wreg;
 			output reg ex_m2reg;
 			output reg ex_wmem;
-			output [31:0] ex_aluR;
+			output reg [31:0] ex_aluR;
 			output reg [31:0] ex_inB;			
 			output reg [4:0] ex_destR;
 			output reg ex_branch;
 			output reg [31:0] ex_pc;
 			
 			wire zero;
-			wire [3:0] ealuc;
-			wire ealuimm,eshift;
 			wire [31:0] sa;
-			wire [31:0] epc4;
-			wire e_regrt;
-			wire [4:0]e_rt;
-			wire [4:0]e_rd;
 		
 			wire [31:0]a_in;
 			wire [31:0]b_in;
+			wire [31:0]aluR;
 			assign a_in = id_shift ? sa : id_inA;
 			assign b_in = id_aluimm ? id_imm : id_inB;
-			assign zero = ~(|ex_aluR);			//zero flag	
+			assign zero = ~(|aluR);			//zero flag	
 			
 			always@(posedge clk or posedge rst) begin		
 				if(rst == 1'b1) begin
 					ex_wreg <= 0;
 					ex_m2reg <= 0;
 					ex_wmem <= 0;
+					ex_aluR <= 0;
 					ex_inB <= 0;
 					ex_destR <= 0;
 					ex_branch<= 0;
@@ -114,7 +110,8 @@ module ex_stage (clk,
 					ex_m2reg <= id_m2reg;
 					ex_wmem <= id_wmem;					
 					ex_inB <= id_inB;
-					ex_destR <= e_regrt? e_rt : e_rd; //the write back destination reg
+					ex_aluR <= aluR;
+					ex_destR <= id_regrt? id_rt : id_rd; //the write back destination reg
 					ex_branch<=id_branch & zero;
 					ex_pc <= id_pc4 + id_imm; //{odata_imm[29:0], 2'b00};
 					EXE_ins_type <= ID_ins_type;
@@ -130,7 +127,7 @@ module ex_stage (clk,
 			Alu x_Alu(a_in,
 						 b_in,
 						 id_aluc,
-						 ex_aluR
+						 aluR
 						 );
 	
 endmodule

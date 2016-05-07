@@ -50,7 +50,7 @@ module ctrl_unit(clk, rst, instr,
 			
 			assign cu_sext = (opcode == `OP_ANDI || opcode == `OP_ORI) ? 0 : 1;//when   need to sign extend?
 			
-			always @(*) begin
+			always @(posedge clk or posedge rst) begin
 					if(rst) begin 
 						cu_branch <=0; 
 						cu_wreg <=0;

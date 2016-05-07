@@ -79,8 +79,8 @@ module id_stage (clk,
 			output cu_regrt;
 			
 			output reg [31:0] id_pc4;
-			output [31:0] id_inA;
-			output [31:0] id_inB;
+			output reg [31:0] id_inA;
+			output reg [31:0] id_inB;
 			output reg [31:0] id_imm;			
 			output reg [4:0] rd;
 			output reg [4:0] rt;
@@ -94,8 +94,8 @@ module id_stage (clk,
 			wire [15:0] imm;
 					
 			assign imm = if_inst[15:0];
-			assign id_inA = rdata_A;
-			assign id_inB = rdata_B;	
+			//assign id_inA = rdata_A;
+			//assign id_inB = rdata_B;	
 			always @ (posedge clk or posedge rst)
 				if (rst==1)begin			
 					ID_ins_type <= 0;
@@ -109,11 +109,12 @@ module id_stage (clk,
 				begin		
 					ID_ins_type <= IF_ins_type;
 					ID_ins_number <= IF_ins_number;
-					id_pc4 <= if_pc4;
-					
+					id_pc4 <= if_pc4;			
 					id_imm <= cu_sext?( imm[15]?{16'hffff,imm}:{16'b0,imm}):{16'b0,imm};	//immediate extend
 					rt <= if_inst[20:16];
-					rd <= if_inst[15:11];				
+					rd <= if_inst[15:11];	
+					id_inA <= rdata_A;
+					id_inB <= rdata_B;			
 				end
 			
 			regfile x_regfile(clk, 
