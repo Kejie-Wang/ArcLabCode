@@ -48,7 +48,10 @@ module ex_stage (clk,
 					  ID_ins_type, 
 					  ID_ins_number, 
 					  EXE_ins_type, 
-					  EXE_ins_number
+					  EXE_ins_number,
+					  
+					  aluR,
+					  destR
 					  );
 					  
 			input clk, rst;
@@ -69,6 +72,9 @@ module ex_stage (clk,
 			input[3:0] ID_ins_number;
 			output reg [3:0] EXE_ins_type;
 			output reg [3:0] EXE_ins_number;
+			
+			output [31:0]aluR;
+			output [4:0]destR;
 			
 			input[31:0] id_pc4;
 			input id_branch;
@@ -91,6 +97,8 @@ module ex_stage (clk,
 			assign a_in = id_shift ? sa : id_inA;
 			assign b_in = id_aluimm ? id_imm : id_inB;
 			assign zero = ~(|aluR);			//zero flag	
+			
+			assign destR = id_regrt? id_rt : id_rd;
 			
 			always@(posedge clk or posedge rst) begin		
 				if(rst == 1'b1) begin

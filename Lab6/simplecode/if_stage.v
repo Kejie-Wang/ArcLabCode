@@ -82,14 +82,20 @@ module if_stage (clk, 	//step
 			//stall
 			assign inst[31:0] = inst_m[31:0];
 			always @ (posedge clk or posedge rst) begin
+				/*if(ctrl_branch == 1) begin
+					pc[31:0] <= npc[31:0];
+				end*/
 				if(rst == 1'b1) begin
 					pc[31:0] <=32'hffffffff;
 					if_pc4 <= 0;
 					run <= 1'b0;
 					if_inst <= 0;
 				end
-				else begin
+				else if(clk==1'b1) begin
 					if(stall == 0) begin
+						pc[31:0] <= npc[31:0];
+					end
+					if(ctrl_branch == 1) begin
 						pc[31:0] <= npc[31:0];
 					end
 					run <= 1'b1;

@@ -53,7 +53,13 @@ module id_stage (clk,
 					  ID_ins_number, 
 					  
 					  which_reg, 	//read which reg					  
-					  reg_content	//read content = regs[which_reg]
+					  reg_content,	//read content = regs[which_reg]
+					  aluR,
+					  destR,
+					  ex_aluR,
+					  ex_destR,
+					  id_beq,
+					  id_beq_pc
 					  );
 	
 			input clk;
@@ -90,7 +96,13 @@ module id_stage (clk,
 			output reg [4:0] rs;
 			
 			output reg [3:0] ID_ins_type;
-			output reg [3:0] ID_ins_number;
+			output reg [3:0] ID_ins_number;	
+			
+			input [31:0] aluR, ex_aluR;
+			input [4:0] destR, ex_destR;
+			
+			output reg id_beq;
+			output reg [31:0]id_beq_pc;
 			
 			wire cu_sext;
 			wire [31:0] rdata_A;
@@ -98,8 +110,17 @@ module id_stage (clk,
 			wire [15:0] imm;
 					
 			assign imm = if_inst[15:0];
-			//assign id_inA = rdata_A;
-			//assign id_inB = rdata_B;	
+			//forward not taken
+			//advance the branch test to id
+			//only one stall after the beq
+			wire[5:0] opcode;
+			wire[31:0]forward_A, forward_B;
+			
+			assign forward_A = (if_inst[25:21] == ex_destR)?ex_aluR:((if_inst[25:21] == destR) ? aluR : rdata_A);
+			assign forward_B = (if_inst[20:16] == ex_destR)?ex_aluR:((if_inst[20:16] == destR) ? aluR : rdata_A);
+			assign opcode = if_inst[31:26];
+			
+			//	assign 
 			always @ (posedge clk or posedge rst)
 				if (rst==1)begin			
 					ID_ins_type <= 4'b0;
@@ -110,6 +131,7 @@ module id_stage (clk,
 					rt <= 5'b0;
 					rd <= 5'b0;		
 					rs <= 5'b0;
+					//id_beq <= 0;
 				end
 				else
 				begin		
@@ -122,9 +144,18 @@ module id_stage (clk,
 					rt <= if_inst[20:16];
 					rd <= if_inst[15:11];	
 					id_inA <= rdata_A;
-					id_inB <= rdata_B;			
+					id_inB <= rdata_B;							
 				end
 			
+			always @(*)
+			if(rst) begin
+				id_beq <= 0;
+				id_beq_pc <=0;
+			end
+			else begin
+				id_beq <= (opcode == `OP_BEQ) & (forward_A == forward_B);	
+				id_beq_pc <= (if_pc4 + ( imm[15]?{16'hffff,imm}:{16'b0,imm}));
+			end
 			regfile x_regfile(clk, 
 									rst, 
 									if_inst[25:21], //rs

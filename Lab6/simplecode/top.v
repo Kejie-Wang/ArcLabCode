@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module top(input wire CCLK, 
+ module top(input wire CCLK, 
 		   input wire BTN3, 
 		   input wire BTN2, 
 		   input wire [3:0]SW, 
@@ -117,8 +117,11 @@ module top(input wire CCLK,
 			
 			assign rst = BTN2;
 			
-			wire stall;
+			wire[31:0] aluR;
+			wire[4:0] destR;
 			
+			wire stall;
+			wire id_beq;
 			initial begin
 				strdata <= "01234567 00 0123f01d01e01m01w01 ";
 				SW_old = 4'b0;
@@ -188,7 +191,7 @@ module top(input wire CCLK,
 			assign pc [31:0] = if_npc[31:0];
 			
 		
-			
+			wire[31:0] id_beq_pc;
 			/*anti_jitter x_anti_jitter(CCLK,
 												rst,
 												BTN3,
@@ -200,9 +203,10 @@ module top(input wire CCLK,
 								pc, 
 								//mem_pc, //the branch pc
 								//mem_branch, //branch ctrl signal
-								ex_pc,
-								ex_branch,
-								
+								//ex_pc,
+								id_beq_pc,
+								//ex_branch,
+								id_beq,
 								if_npc, //instruction fecth next pc = pc +4 | branch pc
 								if_pc4, //instruction fecth pc + 4
 								if_inst, //fecth instruction
@@ -245,7 +249,14 @@ module top(input wire CCLK,
 								EX_ins_type, 
 								EX_ins_number, 
 								{1'b0,which_reg}, 
-								reg_content
+								reg_content,
+								
+								aluR,
+								destR,
+								ex_aluR,
+								ex_destR,
+								id_beq,
+								id_beq_pc
 								);
 				
 			ex_stage x_ex_stage(BTN3OUT, 
@@ -277,7 +288,10 @@ module top(input wire CCLK,
 								EX_ins_type, 
 								EX_ins_number, 
 								MEM_ins_type, 
-								MEM_ins_number
+								MEM_ins_number,
+								
+								aluR,
+								destR
 								);
 			  
 			mem_stage x_mem_stage(BTN3OUT,

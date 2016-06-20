@@ -22,6 +22,8 @@
 //macro definitions
 
 //operation code
+`include "macro.vh"
+
 module forward_ctr(clk,
 						rst,
 						id_inA,
@@ -84,10 +86,12 @@ module forward_ctr(clk,
 		assign id_inB_forward = (mem_rt_forward) ? mem_aluR : ((wb_rt_forward) ? wb_dest : id_inB);
 	
 		always @(*) begin
-			if(rst)
+			if(rst) begin
 				stall <=0;
-			else
-				stall <= ((if_op == 6'b100011) && ((if_rt == rs) || (if_rt == rt))) ? 1 : 0;
+			end
+			else begin 
+				stall <= (((if_op == `OP_LW) && ((if_rt == rs) || (if_rt == rt))) ? 1 : 0) || (if_op == `OP_BEQ);
+			end
 		end
 		
 endmodule
